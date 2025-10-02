@@ -31,17 +31,17 @@ button.btn{cursor:pointer;padding:10px 16px; border-radius:10px; border:none; ba
 button.btn:hover{transform:translateY(-2px);}
 button.btn:active{transform:translateY(2px);}
 .muted{color:var(--muted);}
-.booking-item, .coupon-item{background:var(--glass); padding:14px; border-radius:12px; margin-bottom:12px; transition:transform .2s ease, box-shadow .2s ease;}
-.booking-item:hover, .coupon-item:hover{transform:translateY(-2px); box-shadow:0 8px 25px rgba(255,136,0,0.3);}
+.booking-item, .coupon-item, .message-item{background:var(--glass); padding:14px; border-radius:12px; margin-bottom:12px; transition:transform .2s ease, box-shadow .2s ease;}
+.booking-item:hover, .coupon-item:hover, .message-item:hover{transform:translateY(-2px); box-shadow:0 8px 25px rgba(255,136,0,0.3);}
 .pill{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;}
 .status{padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700;}
 .status.pending{background:var(--pending);color:#120800;}
 .status.approved{background:var(--success);color:#120800;}
 .status.rejected{background:var(--rejected);color:#fff;}
 .flex{display:flex;gap:10px; align-items:center; flex-wrap:wrap;}
-.userBookings, .incomingList, .couponList{max-height:320px; overflow-y:auto;}
-.userBookings::-webkit-scrollbar, .incomingList::-webkit-scrollbar, .couponList::-webkit-scrollbar{width:6px;}
-.userBookings::-webkit-scrollbar-thumb, .incomingList::-webkit-scrollbar-thumb, .couponList::-webkit-scrollbar-thumb{background:rgba(255,136,0,0.5); border-radius:3px;}
+.userBookings, .incomingList, .couponList, .messageList{max-height:300px; overflow-y:auto;}
+.userBookings::-webkit-scrollbar, .incomingList::-webkit-scrollbar, .couponList::-webkit-scrollbar, .messageList::-webkit-scrollbar{width:6px;}
+.userBookings::-webkit-scrollbar-thumb, .incomingList::-webkit-scrollbar-thumb, .couponList::-webkit-scrollbar-thumb, .messageList::-webkit-scrollbar-thumb{background:rgba(255,136,0,0.5); border-radius:3px;}
 .logout-btn{background:transparent;color:var(--accent);border:1px solid rgba(255,136,0,0.3); margin-top:10px;}
 @media(max-width:980px){ .container{grid-template-columns:1fr;} }
 </style>
@@ -54,7 +54,6 @@ button.btn:active{transform:translateY(2px);}
 </header>
 
 <div class="container">
-
 <!-- USER PANEL -->
 <main class="panel" id="userPanel">
   <h2>Book a Request</h2>
@@ -69,9 +68,19 @@ button.btn:active{transform:translateY(2px);}
   <select id="bk_type">
     <option value="normal">Normal</option>
     <option value="pro">Pro</option>
+    <option value="1month">1 Month</option>
+    <option value="5month">5 Months</option>
+    <option value="1year">1 Year</option>
+    <option value="1week">1 Week</option>
   </select>
-  <label>Notes / Requirements</label>
-  <textarea id="bk_notes" rows="3" placeholder="Details for the editor"></textarea>
+  <label>Name</label>
+  <input id="bk_name" placeholder="First Name">
+  <label>Last Name</label>
+  <input id="bk_lastname" placeholder="Last Name">
+  <label>Instagram ID</label>
+  <input id="bk_instagram" placeholder="@instagram">
+  <label>Requirements</label>
+  <textarea id="bk_notes" rows="3" placeholder="Details for editor"></textarea>
   <div class="flex" style="margin-top:6px;">
     <input id="bk_coupon" placeholder="Coupon code" style="flex:1;">
     <button class="btn" onclick="applyCoupon()">Apply</button>
@@ -80,7 +89,6 @@ button.btn:active{transform:translateY(2px);}
     <div>Price: <span id="bk_price">₹0</span></div>
     <button class="btn" onclick="submitBooking()">Send Request</button>
   </div>
-
   <h2 style="margin-top:20px;">My Booking Requests</h2>
   <div class="userBookings" id="userBookings"></div>
   <button class="btn logout-btn" onclick="logout()">Log Out</button>
@@ -93,35 +101,55 @@ button.btn:active{transform:translateY(2px);}
   <input id="newCoupon" placeholder="Coupon Code">
   <input id="newDiscount" type="number" placeholder="Discount ₹" style="margin-top:6px;">
   <button class="btn" onclick="addCoupon()">Add Coupon</button>
-  <div class="couponList" id="couponList" style="margin-top:10px;"></div>
-
+  <div class="couponList" id="couponList"></div>
+  
   <h3 style="margin-top:20px;">All User Requests</h3>
   <div class="incomingList" id="incomingList"></div>
+
+  <h3 style="margin-top:20px;">Broadcast Messages</h3>
+  <input id="broadcastMsg" placeholder="Message to users">
+  <button class="btn" onclick="sendBroadcast()">Send</button>
+  <div class="messageList" id="messageList"></div>
+
   <button class="btn logout-btn" onclick="logout()">Log Out</button>
 </aside>
 
 <script>
-// JS logic same as previous, fully functional
-let mode = localStorage.getItem('ansh_mode') || '';
-let coupons = JSON.parse(localStorage.getItem('ansh_coupons')||'[]');
-let bookings = JSON.parse(localStorage.getItem('ansh_bookings')||'[]');
-let currentBooking={service:'photo', type:'normal', price:0, couponApplied:null};
-const DEV_CODE='FXANSHPRO';
-const NORMAL_CODE='FXANSH';
+// ---- Config ----
+const NORMAL_CODE="FXANSH";
+const DEV_CODE="FXANSHPRO";
+let mode=localStorage.getItem("ansh_mode")||"";
+let bookings=JSON.parse(localStorage.getItem("ansh_bookings")||"[]");
+let coupons=JSON.parse(localStorage.getItem("ansh_coupons")||"[]");
+let messages=JSON.parse(localStorage.getItem("ansh_messages")||"[]");
+let currentBooking={price:0,couponApplied:0};
 
-function showGate(){
-  const gate=document.createElement('div');
-  gate.style.position='fixed'; gate.style.inset='0'; gate.style.background='rgba(0,0,0,0.85)'; gate.style.display='flex';
-  gate.style.alignItems='center'; gate.style.justifyContent='center'; gate.style.zIndex='1000';
-  gate.innerHTML=`
-  <div style="background:#1b0f00;padding:20px;border-radius:12px;text-align:center; width:300px;">
-    <h2>Enter Access Code</h2>
-    <input id="gateInput" placeholder="Code" style="width:100%;padding:10px;margin-top:10px;border-radius:6px;">
-    <button class="btn" style="margin-top:10px;" onclick="tryGate()">Enter</button>
-  </div>`;
-  document.body.appendChild(gate);
+// ---- Gate ----
+if(!mode){
+  const code=prompt(`Enter access code:\nNormal Users: ${NORMAL_CODE}`);
+  if(code.toUpperCase()===NORMAL_CODE){ mode="user"; }
+  else if(code.toUpperCase()===DEV_CODE){ mode="dev"; }
+  else { alert("Invalid code!"); location.reload(); }
+  localStorage.setItem("ansh_mode",mode);
 }
 
-function tryGate(){
-  const code=document.getElementById('gateInput').value.trim();
-  if(code.toUpperCase()===NORMAL_CODE){ mode='user'; localStorage.setItem('ansh_mode','user'); init(); document.body.remove
+// ---- Init UI ----
+document.getElementById("modeBadge").textContent=mode==="dev"?"Developer":"User";
+document.getElementById("userPanel").style.display=mode==="user"?"block":"none";
+document.getElementById("devPanel").style.display=mode==="dev"?"block":"none";
+
+const priceMap={
+  photo:{normal:90,pro:120},
+  video:{normal:140,pro:160},
+  reel:{normal:150,pro:200},
+  subscription:{"1month":1000,"5month":5000,"1year":10000,"1week":250}
+};
+
+// ---- Functions ----
+function setupTypeOptions(){
+  const s=document.getElementById("bk_service").value;
+  const tSelect=document.getElementById("bk_type");
+  if(s==="subscription"){
+    tSelect.innerHTML='<option value="1month">1 Month</option><option value="5month">5 Months</option><option value="1year">1 Year</option><option value="1week">1 Week</option>';
+  }else{
+    tSelect.innerHTML='<option value="normal">Normal</option><option value
