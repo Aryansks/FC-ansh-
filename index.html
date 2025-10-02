@@ -4,9 +4,508 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>ANSH Edit Studio — Book Video / Reel / Photo Edits</title>
-<!-- (Full code omitted here for brevity in this cell, but in practice we would include the full HTML from the assistant's answer) -->
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --accent1:#ff5c7c; --accent2:#6ef3c5;
+    --glass: rgba(255,255,255,0.03); --muted: rgba(255,255,255,0.6);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; background:
+    radial-gradient(1200px 400px at 10% 10%, rgba(111,66,193,0.12), transparent),
+    linear-gradient(160deg, rgba(0,0,0,0.6), rgba(10,12,20,0.6)), #071024;
+    color:#e7eef8; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  }
+
+  header{
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    padding:20px; max-width:1200px; margin:0 auto;
+  }
+  .logo {display:flex; align-items:center; gap:12px; font-weight:700; font-size:20px;}
+  .logo .dot{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#071024;box-shadow:0 6px 20px rgba(110,243,197,0.12);
+    transform:rotate(-8deg);
+  }
+
+  .container{max-width:1200px;margin:20px auto;padding:18px; display:grid; grid-template-columns: 1fr 360px; gap:20px;}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:14px; padding:18px; box-shadow:0 6px 30px rgba(1,8,20,0.6); backdrop-filter: blur(6px);}
+  h2{margin:0 0 12px 0;font-size:18px}
+  .prices{display:grid; grid-template-columns: repeat(2,1fr); gap:12px;}
+  .price-card{background:var(--glass); padding:12px; border-radius:10px; position:relative; overflow:hidden;}
+  .price-card strong{display:block;font-size:16px}
+  .price{position:absolute; right:12px; top:12px; font-weight:800; font-size:18px; color:var(--accent2)}
+  .cta{display:flex; gap:8px; margin-top:12px;}
+  .btn{cursor:pointer;padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#071024;font-weight:700;box-shadow:0 10px 20px rgba(110,243,197,0.06); transition:transform .18s ease}
+  .btn:active{transform:translateY(2px)}
+  .muted{color:var(--muted); font-size:13px}
+  .subs{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+  .sub-pill{display:flex;justify-content:space-between;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));}
+
+  /* Booking modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6); display:none; align-items:center; justify-content:center; z-index:50; padding:20px;}
+  .modal{width:100%;max-width:720px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:14px;padding:18px; box-shadow:0 14px 40px rgba(0,0,0,0.6); transform:translateY(20px); animation:pop .26s ease forwards;}
+  @keyframes pop{from{opacity:0; transform:translateY(30px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  label{font-size:13px; color:var(--muted); margin-bottom:6px; display:block}
+  input, select, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04); background:transparent;color:inherit}
+  .small{font-size:13px;color:var(--muted)}
+  .coupon{display:flex; gap:8px; margin-top:8px}
+  .final{margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+  .note{font-size:13px;color:var(--muted); margin-top:8px}
+  footer{max-width:1200px;margin:20px auto;padding:18px;color:var(--muted); text-align:center}
+
+  /* Gate modal */
+  .gate{position:fixed; inset:0; display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(2,6,23,0.4), rgba(1,6,14,0.9)); z-index:100;}
+  .gate-card{background:#071024;padding:22px;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.8); width:100%; max-width:420px; text-align:center}
+  .code-list{margin-top:8px;color:var(--muted); font-size:13px}
+
+  /* developer badge */
+  .dev-badge{display:inline-block;background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;font-size:13px;color:var(--accent2);font-weight:700}
+
+  /* incoming list (developer) */
+  .incoming{display:flex;flex-direction:column;gap:8px; margin-top:12px}
+  .incoming .item{background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));padding:12px;border-radius:10px}
+  .pill{display:inline-block;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02); font-size:12px}
+
+  /* small screens */
+  @media (max-width:980px){ .container{grid-template-columns:1fr; padding:16px} }
+</style>
+</head>
 <body>
-<h1>ANSH Edit Studio</h1>
-<p>Replace this with the full HTML code I provided earlier.</p>
+
+<header>
+  <div class="logo">
+    <div class="dot">A</div>
+    <div>
+      ANSH Edit Studio<br><span style="font-weight:500;font-size:13px;color:var(--muted)">Video · Reels · Photo edits</span>
+    </div>
+  </div>
+  <div style="text-align:right">
+    <div class="muted">Quality edits • Fast turnaround</div>
+    <div style="margin-top:8px"><span class="dev-badge" id="modeBadge">User</span></div>
+  </div>
+</header>
+
+<div class="container">
+  <main class="panel">
+    <h2>Editing Price & Services</h2>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px;">
+        <h3 style="margin:6px 0 8px 0">Photo Edits</h3>
+        <div class="price-card">
+          <strong>Normal photo edit</strong>
+          <div class="muted">Basic color correction, crop, minor retouches</div>
+          <div class="price">₹90</div>
+          <div class="cta"><button class="btn" onclick="openBooking('photo','normal')">Book Now</button></div>
+        </div>
+        <div class="price-card" style="margin-top:8px">
+          <strong>Pro photo edit</strong>
+          <div class="muted">Advanced retouch, skin, background work</div>
+          <div class="price">₹120</div>
+          <div class="cta"><button class="btn" onclick="openBooking('photo','pro')">Book Now</button></div>
+        </div>
+      </div>
+
+      <div style="flex:1;min-width:220px">
+        <h3 style="margin:6px 0 8px 0">Video Edits</h3>
+        <div class="price-card">
+          <strong>Normal video edit</strong>
+          <div class="muted">Cutting, transitions, soundtrack</div>
+          <div class="price">₹140</div>
+          <div class="cta"><button class="btn" onclick="openBooking('video','normal')">Book Now</button></div>
+        </div>
+        <div class="price-card" style="margin-top:8px">
+          <strong>Pro video edit</strong>
+          <div class="muted">Advanced color grade, motion graphics</div>
+          <div class="price">₹160</div>
+          <div class="cta"><button class="btn" onclick="openBooking('video','pro')">Book Now</button></div>
+        </div>
+      </div>
+
+      <div style="flex:1;min-width:220px">
+        <h3 style="margin:6px 0 8px 0">Reel Edits</h3>
+        <div class="price-card">
+          <strong>Normal reel edit</strong>
+          <div class="muted">Quick cut, trending template</div>
+          <div class="price">₹150</div>
+          <div class="cta"><button class="btn" onclick="openBooking('reel','normal')">Book Now</button></div>
+        </div>
+        <div class="price-card" style="margin-top:8px">
+          <strong>Pro reel edit</strong>
+          <div class="muted">Custom motion design, effects</div>
+          <div class="price">₹200</div>
+          <div class="cta"><button class="btn" onclick="openBooking('reel','pro')">Book Now</button></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:18px">Subscriptions</h2>
+    <div class="subs">
+      <div class="sub-pill"><div>1 Month</div><div><strong>₹1000</strong> <span class="muted">(50 edits)</span></div></div>
+      <div class="sub-pill"><div>5 Months</div><div><strong>₹5000</strong> <span class="muted">(250 edits)</span></div></div>
+      <div class="sub-pill"><div>1 Year</div><div><strong>₹10000</strong> <span class="muted">(500 edits)</span></div></div>
+      <div class="sub-pill" style="margin-top:6px"><div>Weekly</div><div><strong>1 week</strong> <span class="muted">₹250 (20 edits)</span></div></div>
+    </div>
+
+    <p class="note">Thank you 🙏❤️ — Use code <strong>FXANSH</strong> at first open to enter. (Developer code exists but is hidden.)</p>
+  </main>
+
+  <aside class="panel">
+    <h2>Quick Actions</h2>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+      <button class="btn" onclick="openBooking('photo','pro')">Book Pro Photo</button>
+      <button class="btn" onclick="openBooking('video','pro')">Book Pro Video</button>
+      <button class="btn" onclick="openBooking('reel','pro')">Book Pro Reel</button>
+      <div class="muted" style="margin-top:12px">Coupon for bookings: <strong>ANSHKING OFF</strong> (₹20 off)</div>
+      <div style="margin-top:10px">
+        <h3 style="margin:0 0 8px 0">Developer</h3>
+        <div class="muted">If you log in with the developer code you will see incoming bookings.</div>
+      </div>
+
+      <div id="incomingBox" style="display:none;margin-top:12px">
+        <h3 style="margin:0 0 8px 0">Incoming Bookings</h3>
+        <div class="incoming" id="incomingList">
+        <!-- developer bookings populate here -->
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- Booking modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3 id="modalTitle">Book</h3>
+    <div style="margin-top:8px" class="grid2">
+      <div>
+        <label>Name</label>
+        <input id="bk_name" placeholder="Customer name">
+      </div>
+      <div>
+        <label>Contact (phone or email)</label>
+        <input id="bk_contact" placeholder="Phone or email">
+      </div>
+    </div>
+
+    <div style="margin-top:10px" class="grid2">
+      <div>
+        <label>Service</label>
+        <select id="bk_service">
+          <option value="photo">Photo Edit</option>
+          <option value="video">Video Edit</option>
+          <option value="reel">Reel Edit</option>
+          <option value="subscription">Subscription</option>
+        </select>
+      </div>
+      <div>
+        <label>Type / Plan</label>
+        <select id="bk_type">
+          <option value="normal">Normal</option>
+          <option value="pro">Pro</option>
+          <option value="1month">1 Month</option>
+          <option value="5month">5 Month</option>
+          <option value="1year">1 Year</option>
+          <option value="1week">1 Week</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:10px">
+      <label>Notes / Requirements</label>
+      <textarea id="bk_notes" rows="3" placeholder="Details for the editor (links, references etc.)"></textarea>
+    </div>
+
+    <div style="margin-top:8px" class="coupon">
+      <input id="bk_coupon" placeholder="Coupon code (if any)">
+      <button class="btn" onclick="applyCoupon()">Apply</button>
+    </div>
+
+    <div class="final">
+      <div>
+        <div class="muted">Price</div>
+        <div style="font-weight:800;font-size:18px" id="bk_price">₹0</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="submitBooking()">Send Booking</button>
+        <button class="btn" style="background:transparent;color:var(--accent1);border:1px solid rgba(255,255,255,0.04)" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+
+    <p class="note">After booking you will see: <strong>“Wait till editor approve”</strong></p>
+  </div>
+</div>
+
+<!-- Gate for first-time code -->
+<div id="gate" class="gate" style="display:none">
+  <div class="gate-card">
+    <h2>Enter access code</h2>
+    <p class="muted">Enter the code you received to continue. (Normal user code shown below.)</p>
+    <input id="gateInput" placeholder="Enter code" style="margin-top:12px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);width:100%">
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
+      <button class="btn" onclick="tryCode()">Enter</button>
+    </div>
+    <div class="code-list">
+      <div><strong>Normal users code:</strong> <span style="color:var(--accent2);font-weight:700">FXANSH</span></div>
+      <div style="margin-top:8px;color:var(--muted)">Developer code is hidden and works but is not displayed.</div>
+    </div>
+    <p style="margin-top:12px;color:var(--muted);font-size:13px">This gate shows only the first time a visitor opens the site.</p>
+  </div>
+</div>
+
+<footer>
+  © ANSH Edit Studio — fast, friendly, creative edits. Built for bookings — no payments here (email notification to developer).
+</footer>
+
+<script>
+/* ---------- CONFIG ---------- */
+/* Change this to the developer email you want bookings sent to */
+const developerEmail = "as7027506@gmail.com"; // <<-- set this to your real developer email or webhook
+/* Hidden developer code (DO NOT DISPLAY). It will work but not be shown anywhere. */
+const DEV_CODE = "FXANSHPRO";
+/* Visible normal code */
+const NORMAL_CODE = "FXANSH";
+/* Coupon */
+const COUPON_CODE = "ANSHKING OFF"; // apply ₹20 discount
+/* ---------------------------- */
+
+const prices = {
+  photo: { normal:90, pro:120 },
+  video: { normal:140, pro:160 },
+  reel:  { normal:150, pro:200 },
+  subscription: { "1month":1000, "5month":5000, "1year":10000, "1week":250 }
+};
+
+let currentBooking = { service:'photo', type:'normal', price:0, couponApplied:false };
+
+/* Gate logic: first visit only */
+document.addEventListener('DOMContentLoaded', ()=>{
+  const seen = localStorage.getItem('ansh_seen_gate');
+  if(!seen){
+    document.getElementById('gate').style.display = 'flex';
+  } else {
+    initAfterGate(localStorage.getItem('ansh_mode') || 'user');
+  }
+
+  // Setup selects
+  document.getElementById('bk_service').addEventListener('change', serviceChanged);
+  document.getElementById('bk_type').addEventListener('change', typeChanged);
+});
+
+/* Try code from gate */
+function tryCode(){
+  const v = (document.getElementById('gateInput').value || '').trim();
+  if(!v){ alert('Enter code'); return; }
+  if(v.toUpperCase() === NORMAL_CODE.toUpperCase() || v === DEV_CODE){
+    localStorage.setItem('ansh_seen_gate','1');
+    const mode = (v === DEV_CODE) ? 'dev' : 'user';
+    localStorage.setItem('ansh_mode', mode);
+    document.getElementById('gate').style.display = 'none';
+    initAfterGate(mode);
+    return;
+  }
+  alert('Invalid code.');
+}
+
+/* Initialize after gate is passed */
+function initAfterGate(mode){
+  document.getElementById('modeBadge').textContent = (mode === 'dev') ? 'Developer' : 'User';
+  if(mode === 'dev'){
+    document.getElementById('incomingBox').style.display = 'block';
+    renderIncoming();
+  }
+}
+
+/* Open booking modal from buttons */
+function openBooking(service, type){
+  document.getElementById('modalBackdrop').style.display = 'flex';
+  document.getElementById('modalTitle').textContent = `Book ${capitalize(service)} — ${capitalize(type)}`;
+  document.getElementById('bk_service').value = service;
+  // set type appropriately (for subscriptions, map)
+  if(service === 'subscription'){
+    document.getElementById('bk_type').value = type || '1month';
+  } else {
+    document.getElementById('bk_type').value = type || 'normal';
+  }
+  currentBooking.service = service;
+  currentBooking.type = type;
+  currentBooking.couponApplied = false;
+  document.getElementById('bk_coupon').value = '';
+  calcPrice();
+}
+
+/* Close modal */
+function closeModal(){
+  document.getElementById('modalBackdrop').style.display = 'none';
+}
+
+/* Service changed */
+function serviceChanged(e){
+  const s = e.target.value;
+  const typeSelect = document.getElementById('bk_type');
+  // update type options
+  if(s === 'subscription'){
+    typeSelect.innerHTML = '<option value="1month">1 Month</option><option value="5month">5 Month</option><option value="1year">1 Year</option><option value="1week">1 Week</option>';
+  } else {
+    typeSelect.innerHTML = '<option value="normal">Normal</option><option value="pro">Pro</option>';
+  }
+  calcPrice();
+}
+
+/* Type changed */
+function typeChanged(e){
+  calcPrice();
+}
+
+/* calculate price and show */
+function calcPrice(){
+  const s = document.getElementById('bk_service').value;
+  const t = document.getElementById('bk_type').value;
+  let p = 0;
+  if(s === 'photo' || s === 'video' || s === 'reel'){
+    p = prices[s][t] || 0;
+  } else if(s === 'subscription'){
+    p = prices.subscription[t] || 0;
+  }
+  currentBooking.service = s;
+  currentBooking.type = t;
+  currentBooking.price = p;
+  currentBooking.couponApplied = false;
+  document.getElementById('bk_price').textContent = '₹' + p;
+}
+
+/* apply coupon */
+function applyCoupon(){
+  const entered = (document.getElementById('bk_coupon').value || '').trim();
+  if(!entered){ alert('Enter coupon code'); return; }
+  if(entered.toUpperCase() === COUPON_CODE.toUpperCase()){
+    if(currentBooking.couponApplied){
+      alert('Coupon already applied.');
+      return;
+    }
+    currentBooking.price = Math.max(0, (currentBooking.price || 0) - 20);
+    currentBooking.couponApplied = true;
+    document.getElementById('bk_price').textContent = '₹' + currentBooking.price + ' (₹20 off)';
+    alert('Coupon applied! ₹20 off.');
+  } else {
+    alert('Invalid coupon.');
+  }
+}
+
+/* Submit booking: prepare message, store locally and open mailto to developer */
+function submitBooking(){
+  const name = (document.getElementById('bk_name').value || '').trim();
+  const contact = (document.getElementById('bk_contact').value || '').trim();
+  if(!name || !contact){
+    alert('Please add name and contact.');
+    return;
+  }
+  const notes = (document.getElementById('bk_notes').value || '').trim();
+  const service = document.getElementById('bk_service').value;
+  const type = document.getElementById('bk_type').value;
+  const price = currentBooking.price || 0;
+  const couponText = currentBooking.couponApplied ? 'Yes (ANSHKING OFF - ₹20)' : 'No';
+
+  const booking = {
+    id: 'BK' + Date.now(),
+    name, contact, service, type, price, couponApplied: currentBooking.couponApplied, notes,
+    status: 'pending', createdAt: new Date().toISOString()
+  };
+
+  // store booking locally
+  const arr = JSON.parse(localStorage.getItem('ansh_bookings') || '[]');
+  arr.unshift(booking);
+  localStorage.setItem('ansh_bookings', JSON.stringify(arr));
+
+  // render incoming if dev
+  renderIncoming();
+
+  // prepare developer message
+  const subject = encodeURIComponent(`New Booking: ${service.toUpperCase()} — ${type.toUpperCase()}`);
+  const bodyText = `You have a new customer booking.%0A%0ABooking ID: ${booking.id}%0AName: ${name}%0AContact: ${contact}%0AService: ${service}%0AType/Plan: ${type}%0APrice: ₹${price}%0ACoupon applied: ${couponText}%0ANotes: ${notes || '-'}%0A%0APlease respond/approve when ready.`;
+  const mailto = `mailto:${encodeURIComponent(developerEmail)}?subject=${subject}&body=${bodyText}`;
+
+  // open mailto (this will open user's default email client)
+  window.location.href = mailto;
+
+  // close modal and show wait message
+  closeModal();
+  alert('Booking sent. Wait till editor approve.');
+}
+
+/* Render incoming bookings in dev view */
+function renderIncoming(){
+  const mode = localStorage.getItem('ansh_mode') || 'user';
+  const listEl = document.getElementById('incomingList');
+  if(!listEl) return;
+  if(mode !== 'dev'){ listEl.innerHTML = ''; return; }
+
+  const arr = JSON.parse(localStorage.getItem('ansh_bookings') || '[]');
+  if(arr.length === 0){
+    listEl.innerHTML = '<div class="muted">No bookings yet.</div>';
+    return;
+  }
+  listEl.innerHTML = '';
+  arr.forEach(b=>{
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+      <div><strong>${b.name}</strong> <span class="muted">· ${new Date(b.createdAt).toLocaleString()}</span></div>
+      <div><span class="pill">₹${b.price}</span></div>
+    </div>
+    <div style="margin-top:8px" class="muted">Service: ${b.service} · Type: ${b.type} · Coupon: ${b.couponApplied ? 'Yes' : 'No'}</div>
+    <div style="margin-top:8px">${escapeHtml(b.notes || '')}</div>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn" onclick='approveBooking("${b.id}")'>Approve</button>
+      <button class="btn" style="background:transparent;color:var(--accent1);border:1px solid rgba(255,255,255,0.04)" onclick='rejectBooking("${b.id}")'>Reject</button>
+    </div>`;
+    listEl.appendChild(div);
+  });
+  document.getElementById('incomingBox').style.display = 'block';
+}
+
+/* Approve / reject actions (developer) */
+function approveBooking(id){
+  const arr = JSON.parse(localStorage.getItem('ansh_bookings') || '[]');
+  const idx = arr.findIndex(x=>x.id === id);
+  if(idx === -1) return;
+  arr[idx].status = 'approved';
+  localStorage.setItem('ansh_bookings', JSON.stringify(arr));
+  renderIncoming();
+  alert('Booking approved.'); // developer will likely contact customer
+}
+
+function rejectBooking(id){
+  const arr = JSON.parse(localStorage.getItem('ansh_bookings') || '[]');
+  const idx = arr.findIndex(x=>x.id === id);
+  if(idx === -1) return;
+  arr[idx].status = 'rejected';
+  localStorage.setItem('ansh_bookings', JSON.stringify(arr));
+  renderIncoming();
+  alert('Booking rejected.');
+}
+
+/* small helpers */
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function escapeHtml(s){ return s.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* Expose openBooking to global (used by buttons) */
+window.openBooking = openBooking;
+
+/* If user already logged in previously, set mode badge and maybe show incoming */
+function checkModeOnLoad(){
+  const mode = localStorage.getItem('ansh_mode') || 'user';
+  if(mode === 'dev') {
+    document.getElementById('modeBadge').textContent = 'Developer';
+    document.getElementById('incomingBox').style.display = 'block';
+    renderIncoming();
+  } else {
+    document.getElementById('modeBadge').textContent = 'User';
+  }
+}
+checkModeOnLoad();
+
+</script>
 </body>
 </html>
